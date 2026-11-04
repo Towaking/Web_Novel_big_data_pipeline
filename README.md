@@ -2,15 +2,15 @@
 
 Pipeline end-to-end yang mengumpulkan katalog web novel dari NovelUpdates, membersihkan dan memodelkannya, melatih model machine learning, menganalisis graf, lalu menyajikannya di dashboard Streamlit. Seluruh stack berjalan lokal di Docker.
 
-| Lapisan | Teknologi |
-|---|---|
-| Data lake | MinIO (S3 API, HTTPS, versioning), tiga zona: `raw-data`, `clean-data`, `curated-data` |
-| Penyimpanan terdistribusi | HDFS (1 NameNode, 2 DataNode, blok 4 MB, replikasi 2) |
-| Pemrosesan | Apache Spark 3.5 (batch, SQL, Structured Streaming, MLlib), Hadoop MapReduce di YARN |
-| Model data | Star schema dengan bridge table, property graph |
-| Machine learning | scikit-learn (Logistic Regression, Linear SVM, Random Forest, ensemble), Spark MLlib sebagai pembanding |
-| Graf | NetworkX (PageRank, Louvain, homofili) |
-| Penyajian | Streamlit, 15 halaman |
+| Lapisan                   | Teknologi                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Data lake                 | MinIO (S3 API, HTTPS, versioning), tiga zona: `raw-data`, `clean-data`, `curated-data`            |
+| Penyimpanan terdistribusi | HDFS (1 NameNode, 2 DataNode, blok 4 MB, replikasi 2)                                                   |
+| Pemrosesan                | Apache Spark 3.5 (batch, SQL, Structured Streaming, MLlib), Hadoop MapReduce di YARN                    |
+| Model data                | Star schema dengan bridge table, property graph                                                         |
+| Machine learning          | scikit-learn (Logistic Regression, Linear SVM, Random Forest, ensemble), Spark MLlib sebagai pembanding |
+| Graf                      | NetworkX (PageRank, Louvain, homofili)                                                                  |
+| Penyajian                 | Streamlit, 15 halaman                                                                                   |
 
 ## Isi repositori
 
@@ -129,35 +129,35 @@ Dashboard ada di http://localhost:8501. Restart `streamlit` diperlukan setiap ka
 
 Angka berikut berasal dari snapshot 7 Oktober 2026. Hasil pelatihan bisa bergeser tipis antar mesin dan versi pustaka.
 
-| Tahap | Hasil |
-|---|---|
-| Katalog setelah pembersihan | 39.668 judul (39.652 tier `full`, 16 tier `listing`) |
-| Populasi rating tepercaya | 23.256 judul dengan minimal 10 suara, rata-rata global C = 3,6519 |
-| Model data | 67.799 simpul dan 858.901 sisi pada property graph |
-| Head A (genre, 35 label) | ensemble SVM + Random Forest, F1 makro 0,6121, Precision@1 0,904 |
-| Head D (rating) | MAE 0,3250 dibanding baseline 0,4151 |
-| Pembanding MLlib | F1 makro selisih kurang dari 0,004, waktu latih 18 sampai 43 kali lebih lama pada satu worker |
-| Graf kemiripan | 39.660 simpul, 314.786 sisi, 27 komunitas, modularity 0,7192 |
-| MapReduce | 22 dari 22 task map data-local, empat job identik dengan Spark SQL |
-| Audit tata kelola | 23 pemeriksaan: 17 lulus, 6 informasi, 0 gagal |
+| Tahap                       | Hasil                                                                                         |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| Katalog setelah pembersihan | 39.668 judul (39.652 tier `full`, 16 tier `listing`)                                      |
+| Populasi rating tepercaya   | 23.256 judul dengan minimal 10 suara, rata-rata global C = 3,6519                             |
+| Model data                  | 67.799 simpul dan 858.901 sisi pada property graph                                            |
+| Head A (genre, 35 label)    | ensemble SVM + Random Forest, F1 makro 0,6121, Precision@1 0,904                              |
+| Head D (rating)             | MAE 0,3250 dibanding baseline 0,4151                                                          |
+| Pembanding MLlib            | F1 makro selisih kurang dari 0,004, waktu latih 18 sampai 43 kali lebih lama pada satu worker |
+| Graf kemiripan              | 39.660 simpul, 314.786 sisi, 27 komunitas, modularity 0,7192                                  |
+| MapReduce                   | 22 dari 22 task map data-local, empat job identik dengan Spark SQL                            |
+| Audit tata kelola           | 23 pemeriksaan: 17 lulus, 6 informasi, 0 gagal                                                |
 
 ## Perintah
 
 Semua target `make` memanggil `docker compose exec` di container `pipeline` kecuali disebut lain.
 
-| `make` | Fungsi |
-|---|---|
-| `build`, `up`, `down`, `ps`, `logs` | kelola stack |
-| `verify` | uji lingkungan |
-| `pipeline` | Fase 1 sampai 4 dan tata kelola |
-| `phase1` sampai `phase5` | satu fase saja |
-| `similarity-graph` | graf kemiripan |
-| `catalog`, `datamodel`, `graph-analysis`, `audit`, `variety` | langkah tata kelola satu per satu |
-| `hdfs-load`, `mapreduce`, `mapreduce-verify`, `mapreduce-local` | HDFS dan MapReduce |
-| `streaming-simulate`, `streaming-run`, `streaming-reset` | ingest inkremental |
-| `bigdata-audit` | audit konsep Big Data |
-| `consolidate`, `scrape-listing`, `scrape-detail`, `scrape-status` | akuisisi data |
-| `clean`, `nuke` | hentikan stack, `nuke` juga menghapus data lake |
+| `make`                                                                  | Fungsi                                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------- |
+| `build`, `up`, `down`, `ps`, `logs`                             | kelola stack                                      |
+| `verify`                                                                | uji lingkungan                                    |
+| `pipeline`                                                              | Fase 1 sampai 4 dan tata kelola                   |
+| `phase1` sampai `phase5`                                              | satu fase saja                                    |
+| `similarity-graph`                                                      | graf kemiripan                                    |
+| `catalog`, `datamodel`, `graph-analysis`, `audit`, `variety`    | langkah tata kelola satu per satu                 |
+| `hdfs-load`, `mapreduce`, `mapreduce-verify`, `mapreduce-local`   | HDFS dan MapReduce                                |
+| `streaming-simulate`, `streaming-run`, `streaming-reset`            | ingest inkremental                                |
+| `bigdata-audit`                                                         | audit konsep Big Data                             |
+| `consolidate`, `scrape-listing`, `scrape-detail`, `scrape-status` | akuisisi data                                     |
+| `clean`, `nuke`                                                       | hentikan stack, `nuke` juga menghapus data lake |
 
 Melatih ulang model tanpa menjalankan pipeline: `docker compose exec pipeline python Model/train.py` (semua head), `--only genre` (hanya Head A), atau `--models svm rf ensemble` (arsitektur tertentu).
 
@@ -173,7 +173,7 @@ Hasilnya identik byte demi byte dengan berkas di repositori (39.670 baris, 28 ko
 
 Berkas di `scraped/` adalah snapshot 7 Oktober 2026 (36.679 baris daftar, 36.674 halaman detail). Katalog ini baru sekitar separuh NovelUpdates (sekitar 76 ribu judul) dan mengutamakan judul populer, jadi persentase dan tren yang dihitung darinya tidak mewakili seluruh situs.
 
-### Mengumpulkan ulang dari NovelUpdates
+### Scrap ulang dari NovelUpdates
 
 NovelUpdates berada di balik Cloudflare, jadi scraper memakai cookie sesi dari peramban sungguhan:
 
@@ -192,18 +192,18 @@ Metadata katalog bersifat faktual, tetapi sinopsis tetap ciptaan pemiliknya. Dat
 
 Semua antarmuka hanya terbuka di `127.0.0.1`.
 
-| Antarmuka | Alamat |
-|---|---|
-| Dashboard | http://localhost:8501 |
-| MinIO Console | port 9001 (HTTPS dengan CA lokal, peramban bisa menampilkan peringatan sertifikat) |
-| Spark Master UI | http://localhost:7080 |
-| HDFS NameNode | http://localhost:9870 |
-| YARN ResourceManager | http://localhost:18088 |
-| JupyterLab | http://localhost:8888 |
+| Antarmuka            | Alamat                                                                             |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Dashboard            | http://localhost:8501                                                              |
+| MinIO Console        | port 9001 (HTTPS dengan CA lokal, peramban bisa menampilkan peringatan sertifikat) |
+| Spark Master UI      | http://localhost:7080                                                              |
+| HDFS NameNode        | http://localhost:9870                                                              |
+| YARN ResourceManager | http://localhost:18088                                                             |
+| JupyterLab           | http://localhost:8888                                                              |
 
 Port Spark UI dan YARN sengaja bukan 8080 dan 8088: di Windows kedua port itu sering jatuh di rentang yang dicadangkan Hyper-V. Cek rentang itu dengan `netsh interface ipv4 show excludedportrange protocol=tcp`.
 
-## Pemecahan masalah
+## Beberapa masalah yang mungkin didapat
 
 - **Job Spark berhenti di status WAITING**: memori worker (`SPARK_WORKER_MEMORY`) atau alokasi Docker kurang. Notebook dan pipeline berbagi satu worker, jadi hentikan kernel notebook yang tidak dipakai.
 - **`docker compose up` gagal bind port**: ubah port terkait di `.env`.
