@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dataset table</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..700&display=swap">
+<style>
+  :root {
+    --bg: #FFFFFF; --surface: #F4F0E8; --line: #E4DED3; --ink: #1E2433;
+    --muted: #5B6475; --accent: #1F5E52; --hover: #FAF7F1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.45 "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { height: var(--h, 560px); overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: separate; border-spacing: 0; min-width: 100%; }
+  th, td { padding: 7px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top;
+    max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.null { color: var(--muted); font-style: italic; }
+  thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); font-weight: 650; color: var(--muted); }
+  th button { all: unset; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; color: inherit;
+    border-radius: 4px; }
+  th button:hover, th.sorted button { color: var(--ink); }
+  th button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  th .arrow { font-size: 10px; color: var(--accent); min-width: 10px; }
+  th.fixed { cursor: default; }
+  tbody tr:hover td { background: var(--hover); }
+  td.rowno, th.rowno { color: var(--muted); text-align: right; position: sticky; left: 0; background: var(--bg); }
+  thead th.rowno { background: var(--surface); z-index: 2; }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap"><table><thead id="head"></thead><tbody id="body"></tbody></table></div>
+<script>
+// Streamlit component protocol (no build step): ready -> render events -> setComponentValue.
+const send = (type, data) => window.parent.postMessage(Object.assign({isStreamlitMessage: true, type}, data), "*");
+let args = null;
+
+function cell(value, numeric) {
+  const td = document.createElement("td");
+  if (value === null || value === undefined || value === "") { td.textContent = "null"; td.className = "null"; }
+  else { td.textContent = value; td.title = value; if (numeric) td.className = "num"; }
+  return td;
+}
+
+function render() {
+  const {columns, numeric, sortable, rows, sort_col, sort_dir, first_row, height} = args;
+  document.getElementById("wrap").style.setProperty("--h", height + "px");
+  const head = document.getElementById("head"), body = document.getElementById("body");
+  const tr = document.createElement("tr");
+  const corner = document.createElement("th"); corner.className = "rowno"; corner.textContent = "#"; tr.appendChild(corner);
+  columns.forEach((name, i) => {
+    const th = document.createElement("th");
+    if (numeric[i]) th.classList.add("num");
+    if (!sortable[i]) { th.classList.add("fixed"); th.textContent = name; th.title = "Lists have no order"; tr.appendChild(th); return; }
+    const active = name === sort_col;
+    if (active) th.classList.add("sorted");
+    th.setAttribute("aria-sort", active ? (sort_dir === "asc" ? "ascending" : "descending") : "none");
+    const btn = document.createElement("button");
+    btn.innerHTML = `<span></span><span class="arrow">${active ? (sort_dir === "asc" ? "▲" : "▼") : ""}</span>`;
+    btn.firstChild.textContent = name;
+    btn.title = `Sort every row by ${name}`;
+    btn.onclick = () => send("streamlit:setComponentValue", {
+      value: {col: name, dir: active && sort_dir === "asc" ? "desc" : "asc"}, dataType: "json"});
+    th.appendChild(btn); tr.appendChild(th);
+  });
+  head.replaceChildren(tr);
+  const frag = document.createDocumentFragment();
+  rows.forEach((row, r) => {
+    const line = document.createElement("tr");
+    const no = document.createElement("td"); no.className = "rowno"; no.textContent = (first_row + r).toLocaleString("en-US");
+    line.appendChild(no);
+    row.forEach((v, i) => line.appendChild(cell(v, numeric[i])));
+    frag.appendChild(line);
+  });
+  body.replaceChildren(frag);
+  document.getElementById("wrap").scrollTop = 0;
+  send("streamlit:setFrameHeight", {height: height + 4});
+}
+
+window.addEventListener("message", (event) => {
+  if (event.data.type !== "streamlit:render") return;
+  args = event.data.args;
+  render();
+});
+send("streamlit:componentReady", {apiVersion: 1});
+</script>
+</body>
+</html>

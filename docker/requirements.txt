@@ -1,0 +1,45 @@
+# Runtime dependencies - dipakai bersama oleh service
+# spark-master / spark-worker / pipeline / streamlit
+# (satu image = versi PySpark & Python identik di driver + executor,
+#  syarat wajib agar Spark tidak melempar PythonVersionMismatch)
+
+# Core distributed processing
+pyspark==3.5.3
+
+# Object storage client (Fase 1: ingestion ke MinIO)
+boto3==1.34.162
+
+# Data wrangling lokal (hanya untuk hasil agregasi kecil)
+pandas==2.2.3
+pyarrow==17.0.0
+numpy==1.26.4
+
+# Machine Learning (Fase 4)
+scikit-learn==1.5.2
+joblib==1.4.2
+
+# Dashboard & visualisasi (Fase 5)
+streamlit==1.39.0
+plotly==5.24.1
+altair==5.4.1
+matplotlib==3.9.2
+wordcloud==1.9.3
+
+# Utilities
+python-dotenv==1.0.1
+
+# NLP preprocessing (stemming untuk TF-IDF)
+# SnowballStemmer bekerja penuh offline: tidak perlu nltk.download() apa pun.
+nltk==3.9.1
+
+# Notebook (akses interaktif ke PySpark)
+jupyterlab==4.2.5
+ipywidgets==8.1.5
+
+# Akuisisi data (scripts/scraper/novelupdates.py)
+# NovelUpdates berada di balik Cloudflare managed challenge. `requests` biasa
+# ditolak 403 karena TLS fingerprint-nya bukan browser; curl_cffi meniru
+# fingerprint Chrome sehingga cookie sesi dari browser bisa dipakai ulang.
+# beautifulsoup4 mengurai HTML listing & halaman seri.
+curl_cffi==0.16.3
+beautifulsoup4==4.15.0

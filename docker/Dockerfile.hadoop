@@ -1,0 +1,18 @@
+# apache/hadoop:3.3.6 + Python 3 untuk mapper/reducer Hadoop Streaming.
+#
+# Image resmi berbasis CentOS 7 TANPA Python 3, dan CentOS 7 sudah EOL:
+# mirrorlist.centos.org dimatikan pertengahan 2024, jadi `yum install` polos
+# gagal 404 di setiap mirror (base/updates/extras). Repo diarahkan ke arsip
+# permanen vault.centos.org sebelum install - itulah tiga baris `sed` di bawah.
+ARG HADOOP_BASE_TAG=3.3.6
+FROM apache/hadoop:${HADOOP_BASE_TAG}
+
+USER root
+
+RUN sed -i 's/mirror.centos.org/vault.centos.org/g; s/^#.*baseurl=http/baseurl=http/g; s/^mirrorlist=http/#mirrorlist=http/g' \
+        /etc/yum.repos.d/*.repo \
+    && yum install -y python3 \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+USER hadoop
